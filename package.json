@@ -30,7 +30,7 @@
         "singleQuote": true,
         "trailingComma": "es5"
     },
-    "name": "colorslog",
+    "name": "@gamastudio/colorslog",
     "author": "GamaStudio",
     "module": "dist/colorslog.esm.js",
     "size-limit": [
