@@ -3,11 +3,13 @@ on: [push]
 jobs:
   build:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         node: ['10.x', '12.x', '14.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -17,26 +19,24 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install pnpm
-        run: |
-          curl -L https://get.pnpm.io/install.sh | sh
-          export PATH=$HOME/.pnpm/bin:$PATH
-
-      - name: Cache Node.js modules and pnpm store
+      - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.pnpm-store
-            ~/.pnpm
+          path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+    
       - name: Lint
-        run: pnpm run lint
+        run: pnpm lint
 
       - name: Test
-        run: pnpm run test -- --ci --coverage --maxWorkers=2
+        run: pnpm test -- --ci --coverage --maxWorkers=2
 
       - name: Build
-        run: pnpm run build
+        run: pnpm build
+
+
