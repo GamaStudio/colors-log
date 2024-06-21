@@ -114,6 +114,9 @@ class Colors {
   success(text: string) {
     this.sys('SUCCESS', text);
   }
+  timeout(text: string) {
+    this.sys('TIMEOUT', text);
+  }
 
   error(text: string | any) {
     this.sys('ERROR', text);

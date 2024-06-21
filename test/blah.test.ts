@@ -11,6 +11,9 @@ describe('blah', () => {
     colors.warn('FUNCIONANDO');
   });
   it('works', () => {
+    colors.timeout('FUNCIONANDO');
+  });
+  it('works', () => {
     colors.system('FUNCIONANDO');
   });
   it('works', () => {

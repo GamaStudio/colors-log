@@ -10,6 +10,10 @@ Install the package via npm:
 npm install @gamastudio/colorslog
 ```
 
+```bash
+pnpm i @gamastudio/colorslog
+```
+
 ## Usage
 
 ### Import the module
@@ -79,9 +83,10 @@ Here's an example of how to use the `colorslog` package:
 ```typescript
 import { colors } from '@gamastudio/colorslog';
 
+colors.success('Success message');
+colors.timeout('Success message');
 colors.system('System message');
 colors.info('Information message');
-colors.success('Success message');
 colors.error('Error message');
 colors.warn('Custom warning message');
 ```
