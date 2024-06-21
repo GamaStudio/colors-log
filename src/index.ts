@@ -1,4 +1,4 @@
-enum SystemMessageType {
+export enum SystemMessageType {
   SYS = 'SYS',
   ERROR = 'ERROR',
   WARNING = 'WARNING',
