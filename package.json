@@ -30,16 +30,16 @@
         "singleQuote": true,
         "trailingComma": "es5"
     },
-    "name": "colors-log",
+    "name": "colorslog",
     "author": "GamaStudio",
-    "module": "dist/colors-log.esm.js",
+    "module": "dist/colorslog.esm.js",
     "size-limit": [
         {
-            "path": "dist/colors-log.cjs.production.min.js",
+            "path": "dist/colorslog.cjs.production.min.js",
             "limit": "10 KB"
         },
         {
-            "path": "dist/colors-log.esm.js",
+            "path": "dist/colorslog.esm.js",
             "limit": "10 KB"
         }
     ],
