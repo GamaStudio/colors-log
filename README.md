@@ -83,7 +83,7 @@ colors.system('System message');
 colors.info('Information message');
 colors.success('Success message');
 colors.error('Error message');
-colors.sys('WARNING', 'Custom warning message');
+colors.warn('Custom warning message');
 ```
 
 ## License

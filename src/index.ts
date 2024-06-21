@@ -43,7 +43,7 @@ class Colors {
     };
   }
 
-  log(color: string, text: string) {
+  private log(color: string, text: string) {
     if (this.colors[color]) {
       const currentDate = new Date();
       const formattedDate = `${currentDate
@@ -68,30 +68,30 @@ class Colors {
         `${this.colors[color]}${text}`
       );
     } else {
-      console.log(text); // Print without color if the color is not found
+      console.log(text);
     }
   }
 
-  sys(type: string, text: string | object | any) {
+  private sys(type: string, text: string | object | any) {
     let colorKey: string;
     switch (type) {
       case SystemMessageType.SYS:
-        colorKey = 'cyan'; // Asumiendo que 'orange' es el color para SYS
+        colorKey = 'cyan';
         break;
       case SystemMessageType.ERROR:
-        colorKey = 'red'; // Asumiendo que 'red' es el color para ERROR
+        colorKey = 'red';
         break;
       case SystemMessageType.WARNING:
-        colorKey = 'yellow'; // Asumiendo que 'yellow' es el color para WARNING
+        colorKey = 'yellow';
         break;
       case SystemMessageType.INFO:
-        colorKey = 'blue'; // Asumiendo que 'CYAN' es el color para INFO
+        colorKey = 'blue';
         break;
       case SystemMessageType.SUCCESS:
-        colorKey = 'green'; // Asumiendo que 'GREEN' es el color para SUCCESS
+        colorKey = 'green';
         break;
       case SystemMessageType.TIMEOUT:
-        colorKey = 'orange'; // Asumiendo que 'GREEN' es el color para SUCCESS
+        colorKey = 'orange';
         break;
 
       default:
@@ -107,6 +107,9 @@ class Colors {
   }
   info(text: string) {
     this.sys('INFO', text);
+  }
+  warn(text: string) {
+    this.sys('WARNING', text);
   }
   success(text: string) {
     this.sys('SUCCESS', text);
