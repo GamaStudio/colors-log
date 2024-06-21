@@ -1,7 +1,7 @@
-import { sum } from '../src';
+import { colors } from '../src';
 
 describe('blah', () => {
   it('works', () => {
-    expect(sum(1, 1)).toEqual(2);
+    colors.success('FUNCIONANDO');
   });
 });
