@@ -9,7 +9,7 @@ export enum SystemMessageType {
 }
 
 class Colors {
-  TIMEOUT: string;
+  private TIMEOUT: string;
   colors: { [key: string]: string };
   constructor() {
     this.TIMEOUT = '\x1b[0m';
@@ -40,39 +40,59 @@ class Colors {
       bgCyan: '\x1b[46m',
       bgWhite: '\x1b[47m',
       bgGray: '\x1b[100m',
+      // Nuevos colores
+      brightRed: '\x1b[91m',
+      brightGreen: '\x1b[92m',
+      brightYellow: '\x1b[93m',
+      brightBlue: '\x1b[94m',
+      brightMagenta: '\x1b[95m',
+      brightCyan: '\x1b[96m',
+      brightWhite: '\x1b[97m',
+      bgBrightRed: '\x1b[101m',
+      bgBrightGreen: '\x1b[102m',
+      bgBrightYellow: '\x1b[103m',
+      bgBrightBlue: '\x1b[104m',
+      bgBrightMagenta: '\x1b[105m',
+      bgBrightCyan: '\x1b[106m',
+      bgBrightWhite: '\x1b[107m',
     };
   }
 
-  private log(color: string, text: string) {
-    if (this.colors[color]) {
-      const currentDate = new Date();
-      const formattedDate = `${currentDate
-        .getDate()
-        .toString()
-        .padStart(2, '0')}-${(currentDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${currentDate
-        .getFullYear()
-        .toString()
-        .slice(-2)} ${currentDate
-        .getHours()
-        .toString()
-        .padStart(2, '0')}:${currentDate
-        .getMinutes()
-        .toString()
-        .padStart(2, '0')}`;
+  private log(color: string, text: string, showDate: boolean = true) {
+    let formattedText = text;
 
-      console.log(
-        `${this.colors['orange']}[DATE:`,
-        `${this.colors['red']}${formattedDate}]`,
-        `${this.colors[color]}${text}`
-      );
-    } else {
-      console.log(text);
+    if (this.colors[color]) {
+      if (showDate) {
+        const currentDate = new Date();
+        const formattedDate = `${currentDate
+          .getDate()
+          .toString()
+          .padStart(2, '0')}-${(currentDate.getMonth() + 1)
+          .toString()
+          .padStart(2, '0')}-${currentDate
+          .getFullYear()
+          .toString()
+          .slice(-2)} ${currentDate
+          .getHours()
+          .toString()
+          .padStart(2, '0')}:${currentDate
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}`;
+        formattedText = `${this.colors['orange']}[DATE: ${this.colors['red']}${formattedDate}] ${this.colors[color]}${text}${this.TIMEOUT}`;
+      } else {
+        formattedText = `${this.colors[color]}${text}${this.TIMEOUT}`;
+      }
     }
+
+    console.log(formattedText);
   }
 
-  private sys(type: string, text: string | object | any) {
+  private sys(
+    type: string,
+    text: string | object | any,
+    showDate: boolean = true
+  ) {
     let colorKey: string;
     switch (type) {
       case SystemMessageType.SYS:
@@ -99,27 +119,35 @@ class Colors {
     }
 
     const prefix = `[${type}]`;
-    this.log(colorKey, `${prefix} ${text}`);
+    this.log(colorKey, `${prefix} ${text}`, showDate);
   }
 
-  system(text: string) {
-    this.sys('SYS', text);
-  }
-  info(text: string) {
-    this.sys('INFO', text);
-  }
-  warn(text: string) {
-    this.sys('WARNING', text);
-  }
-  success(text: string) {
-    this.sys('SUCCESS', text);
-  }
-  timeout(text: string) {
-    this.sys('TIMEOUT', text);
+  system(text: string, showDate: boolean = true) {
+    this.sys('SYS', text, showDate);
   }
 
-  error(text: string | any) {
-    this.sys('ERROR', text);
+  info(text: string, showDate: boolean = true) {
+    this.sys('INFO', text, showDate);
+  }
+
+  warn(text: string, showDate: boolean = true) {
+    this.sys('WARNING', text, showDate);
+  }
+
+  success(text: string, showDate: boolean = true) {
+    this.sys('SUCCESS', text, showDate);
+  }
+
+  timeout(text: string, showDate: boolean = true) {
+    this.sys('TIMEOUT', text, showDate);
+  }
+
+  error(text: string | any, showDate: boolean = true) {
+    this.sys('ERROR', text, showDate);
+  }
+
+  clear() {
+    console.clear();
   }
 }
 
