@@ -25,6 +25,80 @@ First, import the `colors` instance from the module:
 import { colors, SystemMessageType } from '@gamastudio/colorslog';
 ```
 
+
+### Configuración Global con `setConfig`
+
+El método `setConfig` permite definir opciones globales para personalizar cómo se muestran los mensajes en la consola. Estas opciones incluyen la zona horaria y si se muestra la fecha.
+
+#### Tipo de `setConfig`:
+
+```typescript
+setConfig(config: LogConfig): void
+```
+
+#### Parámetros:
+
+- `config`: Un objeto con las siguientes propiedades opcionales:
+  - `zoneHour`: Número que representa la zona horaria (en horas) respecto a UTC. Por ejemplo:
+    - `-3` para Argentina (UTC-3).
+    - `+2` para España (UTC+2).
+    - Por defecto: `0` (UTC).
+  - `dateShow`: Booleano que indica si se debe mostrar la fecha en los mensajes.
+    - `true`: Muestra la fecha.
+    - `false`: Oculta la fecha.
+    - Por defecto: `true`.
+
+#### Ejemplo de uso:
+
+```typescript
+// Configuración global
+colors.setConfig({
+  zoneHour: -3, // Zona horaria de Argentina (UTC-3)
+  dateShow: true, // Mostrar la fecha
+});
+
+// Cambiar configuración dinámicamente
+colors.setConfig({ dateShow: false }); // Ocultar la fecha en todos los mensajes
+```
+
+#### Sobrescribir configuración individualmente:
+
+Cada método de logging (`info`, `success`, `error`, etc.) acepta un parámetro opcional `config` que sobrescribe la configuración global para esa llamada específica.
+
+```typescript
+colors.info("Información importante", { dateShow: false }); // Ocultar la fecha solo para este mensaje
+colors.warn("Advertencia", { zoneHour: +2 }); // Usar zona horaria de España (UTC+2) solo para este mensaje
+```
+
+---
+
+### Ejemplo completo:
+
+```typescript
+import { colors } from './colors';
+
+// Configuración global
+colors.setConfig({
+  zoneHour: -3, // Zona horaria de Argentina (UTC-3)
+  dateShow: true, // Mostrar la fecha
+});
+
+// Mensajes con configuración global
+colors.success("Operación exitosa"); // Muestra la fecha con la zona horaria de Argentina
+colors.error("Algo salió mal"); // Muestra la fecha con la zona horaria de Argentina
+
+// Sobrescribir configuración individualmente
+colors.info("Información importante", { dateShow: false }); // Oculta la fecha solo para este mensaje
+colors.warn("Advertencia", { zoneHour: +2 }); // Usa la zona horaria de España (UTC+2) solo para este mensaje
+
+// Cambiar configuración global dinámicamente
+colors.setConfig({ dateShow: false });
+colors.timeout("Tiempo de espera agotado"); // No muestra la fecha
+```
+
+
+
+
 ### Logging Messages
 
 You can log messages of different types using the provided methods:

@@ -8,11 +8,22 @@ export enum SystemMessageType {
   // Añade más tipos según necesites
 }
 
+interface LogConfig {
+  zoneHour?: number; // Zona horaria (ej: -3 para Argentina, +2 para España)
+  dateShow?: boolean; // Mostrar u ocultar la fecha
+}
+
 class Colors {
   private TIMEOUT: string;
+  private globalConfig: LogConfig;
   colors: { [key: string]: string };
+
   constructor() {
     this.TIMEOUT = '\x1b[0m';
+    this.globalConfig = {
+      zoneHour: 0, // Por defecto, sin ajuste de zona horaria
+      dateShow: true, // Por defecto, mostrar la fecha
+    };
     this.colors = {
       bright: '\x1b[1m',
       dim: '\x1b[2m',
@@ -58,27 +69,35 @@ class Colors {
     };
   }
 
-  private log(color: string, text: string, showDate: boolean = true) {
+  private getFormattedDate(zoneHour: number): string {
+    const currentDate = new Date();
+    const offset = currentDate.getTimezoneOffset() + zoneHour * 60; // Ajuste de zona horaria
+    const adjustedDate = new Date(currentDate.getTime() + offset * 60 * 1000);
+
+    return `${adjustedDate
+      .getDate()
+      .toString()
+      .padStart(2, '0')}-${(adjustedDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${adjustedDate
+          .getFullYear()
+          .toString()
+          .slice(-2)} ${adjustedDate
+            .getHours()
+            .toString()
+            .padStart(2, '0')}:${adjustedDate
+              .getMinutes()
+              .toString()
+              .padStart(2, '0')}`;
+  }
+
+  private log(color: string, text: string, config?: LogConfig) {
     let formattedText = text;
 
     if (this.colors[color]) {
-      if (showDate) {
-        const currentDate = new Date();
-        const formattedDate = `${currentDate
-          .getDate()
-          .toString()
-          .padStart(2, '0')}-${(currentDate.getMonth() + 1)
-          .toString()
-          .padStart(2, '0')}-${currentDate
-          .getFullYear()
-          .toString()
-          .slice(-2)} ${currentDate
-          .getHours()
-          .toString()
-          .padStart(2, '0')}:${currentDate
-          .getMinutes()
-          .toString()
-          .padStart(2, '0')}`;
+      const { dateShow = this.globalConfig.dateShow, zoneHour = this.globalConfig.zoneHour } = config || {};
+      if (dateShow) {
+        const formattedDate = this.getFormattedDate(zoneHour || 0);
         formattedText = `${this.colors['orange']}[DATE: ${this.colors['red']}${formattedDate}] ${this.colors[color]}${text}${this.TIMEOUT}`;
       } else {
         formattedText = `${this.colors[color]}${text}${this.TIMEOUT}`;
@@ -91,63 +110,75 @@ class Colors {
   private sys(
     type: string,
     text: string | object | any,
-    showDate: boolean = true
+    config?: LogConfig
   ) {
     let colorKey: string;
+    let bgColorKey: string;
     switch (type) {
       case SystemMessageType.SYS:
         colorKey = 'cyan';
+        bgColorKey = 'bgCyan';
         break;
       case SystemMessageType.ERROR:
         colorKey = 'red';
+        bgColorKey = 'bgRed';
         break;
       case SystemMessageType.WARNING:
         colorKey = 'yellow';
+        bgColorKey = 'bgYellow';
         break;
       case SystemMessageType.INFO:
         colorKey = 'blue';
+        bgColorKey = 'bgBlue';
         break;
       case SystemMessageType.SUCCESS:
         colorKey = 'green';
+        bgColorKey = 'bgGreen';
         break;
       case SystemMessageType.TIMEOUT:
         colorKey = 'orange';
+        bgColorKey = 'bgOrange';
         break;
 
       default:
         colorKey = ''; // Sin color si el tipo no se reconoce
+        bgColorKey = '';
     }
 
-    const prefix = `[${type}]`;
-    this.log(colorKey, `${prefix} ${text}`, showDate);
+    const prefix = `${this.colors[bgColorKey]}[${type}]${this.TIMEOUT}`;
+    this.log(colorKey, `${prefix} ${text}`, config);
   }
 
-  system(text: string, showDate: boolean = true) {
-    this.sys('SYS', text, showDate);
+  system(text: string, config?: LogConfig) {
+    this.sys('SYS', text, config);
   }
 
-  info(text: string, showDate: boolean = true) {
-    this.sys('INFO', text, showDate);
+  info(text: string, config?: LogConfig) {
+    this.sys('INFO', text, config);
   }
 
-  warn(text: string, showDate: boolean = true) {
-    this.sys('WARNING', text, showDate);
+  warn(text: string, config?: LogConfig) {
+    this.sys('WARNING', text, config);
   }
 
-  success(text: string, showDate: boolean = true) {
-    this.sys('SUCCESS', text, showDate);
+  success(text: string, config?: LogConfig) {
+    this.sys('SUCCESS', text, config);
   }
 
-  timeout(text: string, showDate: boolean = true) {
-    this.sys('TIMEOUT', text, showDate);
+  timeout(text: string, config?: LogConfig) {
+    this.sys('TIMEOUT', text, config);
   }
 
-  error(text: string | any, showDate: boolean = true) {
-    this.sys('ERROR', text, showDate);
+  error(text: string | any, config?: LogConfig) {
+    this.sys('ERROR', text, config);
   }
 
   clear() {
     console.clear();
+  }
+
+  setConfig(config: LogConfig) {
+    this.globalConfig = { ...this.globalConfig, ...config };
   }
 }
 
