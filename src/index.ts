@@ -11,6 +11,7 @@ export enum SystemMessageType {
 interface LogConfig {
   zoneHour?: number; // Zona horaria (ej: -3 para Argentina, +2 para España)
   dateShow?: boolean; // Mostrar u ocultar la fecha
+  useBackground?: boolean; // Usar colores de fondo en los prefijos (por defecto false para mejor compatibilidad)
 }
 
 class Colors {
@@ -23,6 +24,7 @@ class Colors {
     this.globalConfig = {
       zoneHour: 0, // Por defecto, sin ajuste de zona horaria
       dateShow: true, // Por defecto, mostrar la fecha
+      useBackground: false, // Por defecto, sin colores de fondo para mejor compatibilidad con servidores
     };
     this.colors = {
       bright: '\x1b[1m',
@@ -91,6 +93,42 @@ class Colors {
               .padStart(2, '0')}`;
   }
 
+  private formatArguments(args: any[]): string {
+    return args.map(arg => {
+      if (typeof arg === 'object') {
+        try {
+          return JSON.stringify(arg, null, 2);
+        } catch {
+          return String(arg);
+        }
+      }
+      return String(arg);
+    }).join(' ');
+  }
+
+  private extractConfig(args: any[]): LogConfig | undefined {
+    // Buscar si el último argumento es un objeto de configuración
+    const lastArg = args[args.length - 1];
+    if (lastArg && typeof lastArg === 'object' && !Array.isArray(lastArg)) {
+      // Verificar si tiene propiedades de LogConfig
+      const configKeys = ['zoneHour', 'dateShow', 'useBackground'];
+      const hasConfigProps = configKeys.some(key => key in lastArg);
+      if (hasConfigProps) {
+        return lastArg as LogConfig;
+      }
+    }
+    return undefined;
+  }
+
+  private filterArgs(args: any[]): any[] {
+    const config = this.extractConfig(args);
+    if (config) {
+      // Remover el último argumento si es configuración
+      return args.slice(0, -1);
+    }
+    return args;
+  }
+
   private log(color: string, text: string, config?: LogConfig) {
     let formattedText = text;
 
@@ -109,68 +147,102 @@ class Colors {
 
   private sys(
     type: string,
-    text: string | object | any,
-    config?: LogConfig
+    config?: LogConfig,
+    ...args: any[]
   ) {
     let colorKey: string;
     let bgColorKey: string;
+    let brightColorKey: string; // Para colores más brillantes y visibles
+    
     switch (type) {
       case SystemMessageType.SYS:
         colorKey = 'cyan';
         bgColorKey = 'bgCyan';
+        brightColorKey = 'brightCyan';
         break;
       case SystemMessageType.ERROR:
         colorKey = 'red';
         bgColorKey = 'bgRed';
+        brightColorKey = 'brightRed';
         break;
       case SystemMessageType.WARNING:
         colorKey = 'yellow';
         bgColorKey = 'bgYellow';
+        brightColorKey = 'brightYellow';
         break;
       case SystemMessageType.INFO:
         colorKey = 'blue';
         bgColorKey = 'bgBlue';
+        brightColorKey = 'brightBlue';
         break;
       case SystemMessageType.SUCCESS:
         colorKey = 'green';
         bgColorKey = 'bgGreen';
+        brightColorKey = 'brightGreen';
         break;
       case SystemMessageType.TIMEOUT:
         colorKey = 'orange';
         bgColorKey = 'bgOrange';
+        brightColorKey = 'orange'; // Orange no tiene versión bright, usamos el normal
         break;
 
       default:
         colorKey = ''; // Sin color si el tipo no se reconoce
         bgColorKey = '';
+        brightColorKey = '';
     }
 
-    const prefix = `${this.colors[bgColorKey]}[${type}]${this.TIMEOUT}`;
-    this.log(colorKey, `${prefix} ${text}`, config);
+    // Usar configuración local o global para determinar si usar fondo
+    const { useBackground = this.globalConfig.useBackground } = config || {};
+    
+    let prefix: string;
+    if (useBackground) {
+      // Modo original con fondo de color
+      prefix = `${this.colors[bgColorKey]}[${type}]${this.TIMEOUT}`;
+    } else {
+      // Modo mejorado: usar colores brillantes sin fondo para mejor visibilidad
+      prefix = `${this.colors['bright']}${this.colors[brightColorKey]}[${type}]${this.TIMEOUT}`;
+    }
+    
+    // Formatear todos los argumentos
+    const formattedText = this.formatArguments(args);
+    this.log(colorKey, `${prefix} ${formattedText}`, config);
   }
 
-  system(text: string, config?: LogConfig) {
-    this.sys('SYS', text, config);
+  system(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('SYS', config, ...filteredArgs);
   }
 
-  info(text: string, config?: LogConfig) {
-    this.sys('INFO', text, config);
+  info(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('INFO', config, ...filteredArgs);
   }
 
-  warn(text: string, config?: LogConfig) {
-    this.sys('WARNING', text, config);
+  warn(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('WARNING', config, ...filteredArgs);
   }
 
-  success(text: string, config?: LogConfig) {
-    this.sys('SUCCESS', text, config);
+  success(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('SUCCESS', config, ...filteredArgs);
   }
 
-  timeout(text: string, config?: LogConfig) {
-    this.sys('TIMEOUT', text, config);
+  timeout(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('TIMEOUT', config, ...filteredArgs);
   }
 
-  error(text: string | any, config?: LogConfig) {
-    this.sys('ERROR', text, config);
+  error(...args: any[]) {
+    const config = this.extractConfig(args);
+    const filteredArgs = this.filterArgs(args);
+    this.sys('ERROR', config, ...filteredArgs);
   }
 
   clear() {
